@@ -1,5 +1,7 @@
 {
-  "sumber": "https://… (tautan dataset dari kartu Kasus tim di Workbench)",
-  "berkas": ["data/latih.csv"],
-  "catatan": "Isi pada Sprint 0: versi/tanggal unduh, jumlah baris, dan perubahan (bila ada). Berkas data sendiri tidak di-commit."
+  "sumber": "https://github.com/sains-data/capstone-dl-2026-starter",
+  "berkas": [
+    "data/audio_primer_16khz.npz"
+  ],
+  "catatan": "Data primer rekaman mikrofon 16 kHz meja uji 6 partisipan (P01-P06), 3 ulangan per kondisi, ekstraksi Log-mel 64 pita 1 detik."
 }
