@@ -1,4 +1,4 @@
-# Catatan Model 123450094 — Tantiy Widiyastuti
+# Catatan Model 123450094 — Tanty Widiyastuti
 
 **Jalur Model**: Autoencoder Representasi untuk Klasifikasi/Anomali  
 **Kasus**: Klasifikasi 10 Perintah Suara Pengendali Meja (Log-mel 64 pita, 1 detik)  
