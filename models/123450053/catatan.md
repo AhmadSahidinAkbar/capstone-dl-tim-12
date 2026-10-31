@@ -1,5 +1,4 @@
-# Catatan Model 
-# 123450053 — Khazanatil Ilmi
+# Catatan Model 123450053 — Khazanatil Ilmi
 
 **Jalur Model**: RNN -> LSTM/GRU atas Baris Citra (Modul 07–08)  
 **Kasus**: Klasifikasi 10 Perintah Suara Pengendali Meja (Log-mel 64 pita, 1 detik)  
