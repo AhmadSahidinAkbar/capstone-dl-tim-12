@@ -1,4 +1,6 @@
-# Catatan Model 123450083 — Nadya Ratu Anjani
+# Catatan Model 
+# 123450083 
+# Nadya Ratu Anjani
 
 **Jalur Model**: Transformer Encoder atas Patch (Modul 09)  
 **Kasus**: Klasifikasi 10 Perintah Suara Pengendali Meja (Log-mel 64 pita, 1 detik)  
