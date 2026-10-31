@@ -9,6 +9,7 @@
 ## Regularisasi
 - Batch Normalization setelah layer konvolusi.
 - Dropout (0.2 – 0.3) sebelum layer Fully Connected.
+- Nilai dropout awal ditetapkan sebesar 0.3 pada layer classifier sebelum output 10 kelas.
 - Weight decay (L2 regularization) pada optimizer.
 
 ## Pencarian Hyperparameter (Tabel)

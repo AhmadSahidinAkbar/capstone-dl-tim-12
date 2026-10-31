@@ -1,4 +1,4 @@
-"""Kerangka run.py untuk Tantiy Widiyastuti (123450094)
+"""Kerangka run.py untuk Tanty Widiyastuti (123450094)
 Jalur: Autoencoder Representasi untuk Klasifikasi/Anomali
 Kasus: Perintah Suara Pengendali Meja 10 Kata (Log-mel 64 pita, 1 detik)
 Tugas Sampingan: Reproduksi & Demo
