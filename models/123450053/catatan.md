@@ -27,4 +27,4 @@
 2. Pengaruh Temporal Mean Pooling vs Mengambil hidden state terakhir (`last step`).
 
 ## Hasil 3 Seed Konfigurasi Akhir
-*(Akan dilengkapi pada Sprint 2 dengan seed 1, 2)*
+*(Akan dilengkapi pada Sprint 2 dengan seed 1, 2, 3)*
