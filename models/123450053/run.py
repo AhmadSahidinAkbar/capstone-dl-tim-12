@@ -1,4 +1,5 @@
-"""Kerangka run.py Khazanatl Ilmi (123450053)
+"""Kerangka run.py 
+Khazanatl Ilmi (123450053)
 Jalur: RNN -> LSTM/GRU atas Baris Citra (Modul 07-08)
 Kasus: Perintah Suara Pengendali Meja 10 Kata (Log-mel 64 pita, 1 detik)
 Tugas Sampingan: Integrator Sistem
