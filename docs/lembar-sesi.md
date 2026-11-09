@@ -1,6 +1,6 @@
 # LEMBAR CATATAN SESI MEJA UJI
 ### Tim 12: Perintah Suara Pengendali Meja (10 Kata)
-**Sesi Meja Uji: Rabu, 11 November 2026 (08.00–09.00 WIB)**
+**Sesi Meja Uji: Jumat, 13 November 2026 (13.00–14.00 WIB)**
 
 * **Pencatat Kejadian**: Nadya Ratu Anjani (123450083)
 * **Operator Perekam**: Ahmad Sahidin Akbar (122450044)

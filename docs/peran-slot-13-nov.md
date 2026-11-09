@@ -1,12 +1,12 @@
-# Penetapan Peran Slot Meja Uji (11 Nov 2026) dan Kesiapan Partisipan
+# Penetapan Peran Slot Meja Uji (13 Nov 2026) dan Kesiapan Partisipan
 
-Dokumen ini disusun untuk memenuhi kelengkapan tugas **#2 (Peran slot meja 11 Nov dan partisipan)** pada proyek Capstone Deep Learning: Ruang Cerdas 5 Volt.
+Dokumen ini disusun untuk memenuhi kelengkapan tugas **#2 (Peran slot meja dan partisipan)** pada proyek Capstone Deep Learning: Ruang Cerdas 5 Volt.
 
 * **Tim**: 12
 * **Kasus**: Perintah suara pengendali meja (10 kata)
 * **Pilar**: Suara
 * **Pembimbing**: Ardika Satria
-* **Jadwal Slot Meja**: Rabu, 11 November 2026, pukul 08.00–09.00 WIB
+* **Pengajuan Jadwal Slot Meja**: Jumat, 13 November 2026, pukul 13.00–14.00 WIB
 * **Tempat**: Meja Uji Ruang Cerdas 5V, Lab Sains Data ITERA
 
 ---
@@ -30,7 +30,7 @@ Mengacu pada Buku Panduan Metode Eksperimen Lapangan Bagian 4, seluruh 5 anggota
 Rencana eksperimen tim (`rencana/t12-perintah-suara.yaml`) membutuhkan 6 orang partisipan berbeda yang membentuk 6 blok eksperimen:
 
 1. **Sumber Partisipan**: Seluruh 6 orang partisipan berasal dari **luar anggota tim** (mahasiswa lintas kelompok / kawan sekelas) untuk menjamin objektivitas pengujian variasi vokal penutur baru.
-2. **Jadwal Kehadiran**: Seluruh partisipan dijadwalkan hadir di lab pada pukul **07.50 WIB** (10 menit sebelum slot dimulai) untuk pengarahan singkat dan penandatanganan formulir persetujuan.
+2. **Jadwal Kehadiran**: Seluruh partisipan dijadwalkan hadir di lab pada pukul **12.50 WIB** (10 menit sebelum slot dimulai pada Jumat, 13 November 2026) untuk pengarahan singkat dan penandatanganan formulir persetujuan.
 3. **Kerahasiaan Data (Privasi)**:
    * Sesuai ketentuan, daftar pasangan Nama Asli dan ID Samaran (`P01`, `P02`, `P03`, `P04`, `P05`, `P06`) disimpan terpisah di catatan pribadi Koordinator tim dan **tidak diunggah ke repositori GitHub**.
    * Di dalam lembar sesi, berkas rekaman, dan analisis hanya digunakan kode ID samaran tersebut.
