@@ -7,6 +7,7 @@ from __future__ import annotations
 
 import argparse
 import math
+import os
 import subprocess
 import sys
 import time
@@ -123,7 +124,9 @@ def main() -> None:
     if pred_test is not None:
         np.save(out / "pred_test.npy", np.asarray(pred_test))
         perintah += ["--pred-test", str(out / "pred_test.npy")]
-    subprocess.run(perintah, check=True, cwd=AKAR)
+    env = os.environ.copy()
+    env["PYTHONUTF8"] = "1"
+    subprocess.run(perintah, check=True, cwd=AKAR, env=env)
 
 
 if __name__ == "__main__":
