@@ -1,0 +1,58 @@
+# Rencana eksperimen tim 12: Perintah suara pengendali meja (10 kata)
+# Label: Desain: kata yang diminta layar
+tim: 12
+judul: Perintah suara pengendali meja (10 kata)
+pembimbing: Ardika Satria
+pilar: Suara
+seed: 1012
+ulangan: 3
+durasi_kondisi_detik: 2.5
+jeda_detik: 0.5
+rekam:
+  audio:
+    aktif: true
+    sample_rate: 16000
+  kamera:
+    aktif: false
+faktor:
+  partisipan:
+    jenis: manual
+    taraf:
+      - P01
+      - P02
+      - P03
+      - P04
+      - P05
+      - P06
+    instruksi: Partisipan {taraf} siap di posisi (formulir persetujuan sudah ditandatangani)
+  kata:
+    jenis: isyarat
+    taraf:
+      - nyalakan
+      - matikan
+      - kipas
+      - lampu
+      - pompa
+      - naik
+      - turun
+      - berhenti
+      - ya
+      - batal
+    instruksi: 'Ucapkan: {taraf}'
+  kipas:
+    jenis: otomatis
+    taraf:
+      - 0
+      - 255
+catatan: Tambah ≥30 penutur direkam HP di luar slot; bising meja dari data bersama
+metode:
+  jenis_tugas: Klasifikasi 10 kata (+ diam/lain)
+  masukan_model: Log-mel 64 pita, 1 s
+  metrik_utama: Akurasi per penutur
+  jalur:
+    - CNN
+    - TL
+    - RNN
+    - Transformer
+    - AE
+  pembanding_non_dl: MFCC rata-rata dan simpangan + Random Forest/SVM

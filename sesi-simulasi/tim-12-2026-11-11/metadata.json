@@ -1,0 +1,36 @@
+{
+  "tim": 12,
+  "judul": "Perintah suara pengendali meja (10 kata)",
+  "seed": 1012,
+  "total_kondisi": 360,
+  "kondisi_per_partisipan": 60,
+  "kata": [
+    "nyalakan",
+    "matikan",
+    "kipas",
+    "lampu",
+    "pompa",
+    "naik",
+    "turun",
+    "berhenti",
+    "ya",
+    "batal"
+  ],
+  "partisipan": [
+    "P01",
+    "P02",
+    "P03",
+    "P04",
+    "P05",
+    "P06"
+  ],
+  "taraf_kipas": [
+    0,
+    255
+  ],
+  "ulangan": 3,
+  "durasi_kondisi_detik": 2.5,
+  "jeda_detik": 0.5,
+  "estimasi_total_menit": 23.0,
+  "tanggal_simulasi": "2026-11-11"
+}
