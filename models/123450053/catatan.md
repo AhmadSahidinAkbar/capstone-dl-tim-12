@@ -3,7 +3,7 @@
 **Jalur Model**: RNN (Bi-GRU atas Runtun Waktu Spektrogram) (Modul 07)  
 **Kasus**: Klasifikasi 10 Perintah Suara Pengendali Meja (Log-mel 64 pita, 1 detik)  
 **Tugas Sampingan**: Integrator Sistem  
-**Status Sprint 1**: Kerangka model teruji pada data simulasi (Seed 1)
+**Status Sprint 1**: Teruji pada data simulasi dan data primer meja uji fisik (Seed 1)
 
 ---
 
@@ -46,6 +46,27 @@ Model memproses urutan langkah waktu frame spektrogram Log-mel berdimensi `[Batc
 
 ---
 
-## 5. Rencana Eksplorasi (Sprint 2)
+## 5. Hasil Data Primer Meja Uji (Seed 1) — Sprint 1 (Kartu #18)
+* **File Metrics**: `results/123450053/metrics.json`
+* **Data Hash**: `a1cbb6263d5d79f3764fb31257c722c1` (`n_sampel = 360`, `n_val = 36`)
+* **Metrik Validasi Keseluruhan**:
+  * `val_acc`: `0.3889` (38.89%)
+  * `val_macro_f1`: `0.3375`
+* **Akurasi per Penutur (`partisipan` pada split validasi)**:
+  * `P01` ($n=7$): `0.5714` (57.14%)
+  * `P02` ($n=6$): `0.6667` (66.67%)
+  * `P03` ($n=4$): `0.0000` (0.00%)
+  * `P04` ($n=6$): `0.3333` (33.33%)
+  * `P05` ($n=5$): `0.4000` (40.00%)
+  * `P06` ($n=8$): `0.2500` (25.00%)
+* **Perbandingan dengan Pembanding Non-DL Tim (`results/baseline_non_dl/metrics.json`)**:
+  * Random Forest: `val_acc = 0.0556`, `val_macro_f1 = 0.0364`
+  * SVM (RBF): `val_acc = 0.0556`, `val_macro_f1 = 0.0174`
+  * Model Bi-GRU (`0.3889` akurasi, `0.3375` macro-F1) melampaui pembanding non-DL terbaik secara signifikan (+33.33% akurasi, +0.3011 macro-F1) dengan konfigurasi awal 5 epoch.
+
+---
+
+## 6. Rencana Eksplorasi (Sprint 2)
 * Eksplorasi sel sekuensial: Bi-GRU vs Bi-LSTM terhadap latensi inferensi di meja uji.
 * Variasi pooling: Temporal Mean Pooling vs Attention Pooling vs Last Step hidden state.
+* Penambahan epoch, penjadwalan *learning rate*, serta evaluasi 3 seed (`1, 2, 3`) dan 2 eksperimen ablasi.
