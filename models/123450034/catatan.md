@@ -1,29 +1,59 @@
-# Catatan Model 123450034 — Kharisma Mustika Sari
+﻿# Catatan Model 123450034 — Kharisma Mustika Sari
 
-**Jalur Model**: Transfer Learning / Fine-Tuning (Modul 06)  
-**Kasus**: Klasifikasi 10 Perintah Suara Pengendali Meja (Log-mel 64 pita, 1 detik)  
-**Tugas Sampingan**: Penjaga Data & Evaluasi
+## Identitas Model
+- **Jalur Model:** Transfer Learning / Fine-Tuning
+- **Arsitektur:** MobileNetV3 Small
+- **Kasus:** Klasifikasi 10 kelas perintah suara pengendali meja
+- **Input:** Log-mel spektrogram berukuran 64 × 32
+- **Bobot awal:** Pretrained ImageNet
+- **Perangkat:** CPU laptop
 
-## Alasan Optimizer
-- Menggunakan **AdamW** dengan learning rate rendah ($5 \times 10^{-4}$) dan penalti weight decay $1 \times 10^{-4}$.
-- Alasan: Pada skema transfer learning, penggunaan learning rate yang terlalu besar berisiko merusak bobot representasi awal (*catastrophic forgetting*). AdamW menjaga stabilitas bobot pretrained sekaligus mempercepat konvergensi pada layer klasifikasi baru.
+## Metode Transfer Learning
+Model menggunakan MobileNetV3 Small dengan bobot pretrained ImageNet. Lapisan klasifikasi bawaan diganti dengan lapisan output untuk 10 kelas.
 
-## Regularisasi
-- Pemanfaatan Batch Normalization bawaan backbone untuk menjaga distribusi aktivasi.
-- Dropout sebesar 0.3 pada layer classifier head sebelum proyeksi ke 10 kelas output.
-- Weight decay pada pembaruan bobot untuk mencegah overfitting pada dataset suara meja yang terbatas.
+Sebagian besar layer fitur pretrained dibekukan (*frozen*), sedangkan dua blok fitur terakhir dibuka untuk proses *fine-tuning*. Input spektrogram diubah menjadi tiga channel dan diubah ukurannya menjadi 128 × 128 sebelum diproses oleh model.
 
-## Pencarian Hyperparameter (Tabel)
-*(Akan dieksplorasi pada Sprint 1: perbandingan unfreezing 2 blok teratas vs freeze seluruh backbone, serta learning rate 1e-3 vs 5e-4 vs 1e-4)*
+## Konfigurasi Pelatihan
+
+| Parameter | Nilai |
+|---|---|
+| Optimizer | AdamW |
+| Learning rate | 0.0001 |
+| Weight decay | 0.0001 |
+| Batch size | 16 |
+| Epoch | 10 |
+| Loss function | Cross Entropy Loss |
+| Seed | 2026 |
+| Jumlah kelas | 10 |
+
+AdamW digunakan dengan learning rate rendah untuk membantu menjaga kestabilan bobot pretrained selama proses fine-tuning.
+
+## Hasil Pengujian Sprint 1
 
 | Percobaan | Strategi Backbone | Learning Rate | Batch Size | Val Acc | Val Macro-F1 |
-|---|---|---|---|---|---|
-| Init Sprint 0 | Feature Extraction | 5e-4 | 32 | - | - |
+|---|---|---:|---:|---:|---:|
+| MobileNetV3 Small | Fine-tuning 2 blok terakhir | 0.0001 | 16 | 0.527778 | 0.479719 |
 
-## Ablation (>= 2)
-*(Akan diuji pada Sprint 2)*:
-1. Variasi jumlah layer yang di-unfreeze (hanya classifier vs classifier + blok konvolusi terakhir).
-2. Perbandingan input 1-channel replikasi 3-channel vs adaptasi conv layer pertama.
+- Jumlah data latih: 324 sampel.
+- Jumlah data validasi: 36 sampel.
+- Epoch terbaik: 5.
+- Akurasi validasi terbaik: 52.78%.
+- Macro F1 validasi: 47.97%.
+- Durasi pelatihan: 74.42 detik.
 
-## Hasil 3 Seed Konfigurasi Akhir
-*(Akan dilengkapi pada Sprint 2 dengan seed 1, 2, 3)*
+## Regularisasi
+- Menggunakan bobot pretrained ImageNet.
+- Membekukan sebagian besar layer fitur backbone.
+- Menggunakan weight decay sebesar 0.0001 pada optimizer AdamW.
+
+## Catatan dan Keterbatasan
+1. Label dataset masih berupa angka 0–9. Pemetaan angka ke nama perintah perlu dikonfirmasi kepada koordinator tim.
+2. Pembagian data yang digunakan mengikuti fungsi `data.muat()` dari starter dengan validasi 10%. Pembagian ini belum menggunakan GroupKFold berdasarkan partisipan seperti yang disebutkan dalam protokol.
+3. Pengujian ini menggunakan satu seed dan belum mencakup perbandingan beberapa hyperparameter.
+4. Data uji belum dievaluasi karena protokol belum menyediakan data test.
+
+## Rencana Pengembangan Sprint 2
+1. Membandingkan strategi pembekuan dan pembukaan layer backbone.
+2. Menguji variasi learning rate dan batch size.
+3. Melakukan pengujian dengan tiga seed.
+4. Melakukan evaluasi lanjutan sesuai protokol pembagian data tim.
