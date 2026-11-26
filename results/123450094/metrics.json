@@ -1,13 +1,13 @@
 {
   "metrik": {
-    "val_acc": 0.111111,
-    "val_macro_f1": 0.055556
+    "val_acc": 0.472222,
+    "val_macro_f1": 0.442857
   },
   "seed": 1,
-  "data_hash": "03955ddbf7a0c3de9d6d05052cadde6d",
+  "data_hash": "a1cbb6263d5d79f3764fb31257c722c1",
   "perangkat": "cpu laptop",
   "model": "ae",
   "n_val": 36,
   "n_test": 0,
-  "durasi_detik": 3.7
+  "durasi_detik": 8.8
 }
