@@ -68,3 +68,24 @@ AdamW digunakan dengan learning rate rendah untuk membantu menjaga kestabilan bo
 | **Rata-rata** | **0.638889** | **0.624574** | **50.17** |
 
 Seluruh percobaan menggunakan data_hash yang sama. Evaluasi hanya dilakukan pada data validasi sebanyak 36 sampel; data test belum dievaluasi.
+
+## Hasil Ablation Study
+
+Ablation dilakukan untuk mengetahui pengaruh jumlah blok backbone MobileNetV3 Small yang dilatih terhadap performa model.
+
+| Eksperimen | Blok yang Dilatih | Seed | Val Accuracy | Val Macro-F1 |
+|---|---:|---:|---:|---:|
+| Model utama | 2 | 1–3 | 63,89%* | 62,46%* |
+| Ablation 1 (Frozen) | 0 | 1 | 52,78% | 45,31% |
+| Ablation 2 (One Block) | 1 | 1 | 55,56% | 52,19% |
+
+*Keterangan: Nilai model utama merupakan rata-rata dari tiga seed, sedangkan hasil ablation menggunakan seed 1.
+
+Seluruh eksperimen menggunakan data_hash yang sama dan 36 sampel validasi. Data test belum dievaluasi.
+
+### Interpretasi Ablation
+
+Hasil percobaan menunjukkan bahwa model utama dengan dua blok backbone yang dilatih memperoleh performa validasi tertinggi. Ketika seluruh backbone dibekukan, akurasi validasi sebesar 52,78%. Ketika hanya satu blok terakhir dilatih, akurasi meningkat menjadi 55,56%. Hasil ini menunjukkan bahwa proses fine-tuning pada lebih banyak blok backbone berpotensi meningkatkan performa model pada dataset simulasi yang digunakan.
+
+Catatan: Hasil ablation masih menggunakan satu seed sehingga perlu ditafsirkan sebagai perbandingan awal, bukan kesimpulan akhir.
+

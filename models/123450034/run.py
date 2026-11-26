@@ -146,7 +146,7 @@ def main(seed: int = DEFAULT_SEED, unfreeze_blocks: int = 2, run_tag: str = 'mai
     # Muat model dengan hasil validasi terbaik.
     model.load_state_dict(
         torch.load(
-            "results/" + NIM + f"/best_model_seed{seed}.pth",
+            str(output_dir / f"best_model_{run_tag}_seed{seed}.pth"),
             map_location=DEVICE,
             weights_only=True
         )
