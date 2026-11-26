@@ -57,3 +57,14 @@ AdamW digunakan dengan learning rate rendah untuk membantu menjaga kestabilan bo
 2. Menguji variasi learning rate dan batch size.
 3. Melakukan pengujian dengan tiga seed.
 4. Melakukan evaluasi lanjutan sesuai protokol pembagian data tim.
+
+## Ringkasan Hasil 3 Seed
+
+| Seed | Val Accuracy | Val Macro-F1 | Durasi (detik) |
+|---|---:|---:|---:|
+| 1 | 0.638889 | 0.628131 | 57.14 |
+| 2 | 0.638889 | 0.617020 | 47.10 |
+| 3 | 0.638889 | 0.628571 | 46.27 |
+| **Rata-rata** | **0.638889** | **0.624574** | **50.17** |
+
+Seluruh percobaan menggunakan data_hash yang sama. Evaluasi hanya dilakukan pada data validasi sebanyak 36 sampel; data test belum dievaluasi.

@@ -1,5 +1,6 @@
 ﻿from __future__ import annotations
 
+import argparse
 import time
 import subprocess
 import sys
@@ -15,14 +16,14 @@ from torchvision.models import mobilenet_v3_small, MobileNet_V3_Small_Weights
 from src.protokol import data
 
 NIM = "123450034"
-SEED = 2026
+DEFAULT_SEED = 2026
 EPOCHS = 10
 BATCH_SIZE = 16
 DEVICE = torch.device("cpu")
 
 
 class SpectrogramMobileNet(nn.Module):
-    def __init__(self):
+    def __init__(self, unfreeze_blocks=2):
         super().__init__()
 
         weights = MobileNet_V3_Small_Weights.DEFAULT
@@ -37,9 +38,10 @@ class SpectrogramMobileNet(nn.Module):
             param.requires_grad = False
 
         # Fine-tuning dua blok fitur terakhir.
-        for layer in list(self.backbone.features.children())[-2:]:
-            for param in layer.parameters():
-                param.requires_grad = True
+        if unfreeze_blocks > 0:
+            for layer in list(self.backbone.features.children())[-unfreeze_blocks:]:
+                for param in layer.parameters():
+                    param.requires_grad = True
 
     def forward(self, x):
         # Bentuk awal: (batch, 64, 32)
@@ -61,10 +63,12 @@ class SpectrogramMobileNet(nn.Module):
         return self.backbone(x)
 
 
-def main():
-    torch.manual_seed(SEED)
-    np.random.seed(SEED)
+def main(seed: int = DEFAULT_SEED, unfreeze_blocks: int = 2, run_tag: str = 'main'):
+    torch.manual_seed(seed)
+    np.random.seed(seed)
     torch.set_num_threads(2)
+    output_dir = Path('results') / NIM
+    output_dir.mkdir(parents=True, exist_ok=True)
 
     X_train, y_train, X_val, y_val, _, _ = data.muat()
 
@@ -78,7 +82,7 @@ def main():
         shuffle=True
     )
 
-    model = SpectrogramMobileNet().to(DEVICE)
+    model = SpectrogramMobileNet(unfreeze_blocks=unfreeze_blocks).to(DEVICE)
 
     optimizer = torch.optim.AdamW(
         filter(lambda p: p.requires_grad, model.parameters()),
@@ -101,8 +105,9 @@ def main():
         model.backbone.features.eval()
 
         # Blok terakhir yang dilatih tetap dalam mode train.
-        for layer in list(model.backbone.features.children())[-2:]:
-            layer.train()
+        if unfreeze_blocks > 0:
+            for layer in list(model.backbone.features.children())[-unfreeze_blocks:]:
+                layer.train()
 
         total_loss = 0.0
 
@@ -135,13 +140,13 @@ def main():
             Path("results/" + NIM).mkdir(parents=True, exist_ok=True)
             torch.save(
                 model.state_dict(),
-                "results/" + NIM + "/best_model.pth"
+                str(output_dir / f"best_model_{run_tag}_seed{seed}.pth")
             )
 
     # Muat model dengan hasil validasi terbaik.
     model.load_state_dict(
         torch.load(
-            "results/" + NIM + "/best_model.pth",
+            "results/" + NIM + f"/best_model_seed{seed}.pth",
             map_location=DEVICE,
             weights_only=True
         )
@@ -153,6 +158,8 @@ def main():
         pred_val = val_output.argmax(dim=1).cpu().numpy()
 
     output_dir = Path("results") / NIM
+    np.save(output_dir / f"pred_val_{run_tag}_seed{seed}.npy", pred_val)
+    np.save(output_dir / "pred_val.npy", pred_val)
     np.save(output_dir / "pred_val.npy", pred_val)
 
     duration = time.time() - start
@@ -164,8 +171,8 @@ def main():
         sys.executable, "-m", "src.common.evaluate",
         "--nim", NIM,
         "--model", "tl",
-        "--seed", str(SEED),
-        "--pred-val", str(output_dir / "pred_val.npy"),
+        "--seed", str(seed),
+        "--pred-val", str(output_dir / f"pred_val_{run_tag}_seed{seed}.npy"),
         "--durasi", str(round(duration, 2)),
         "--perangkat", "cpu laptop"
     ]
@@ -174,4 +181,9 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--seed", type=int, default=DEFAULT_SEED)
+    parser.add_argument("--unfreeze-blocks", type=int, choices=[0, 1, 2], default=2)
+    parser.add_argument("--run-tag", type=str, default="main")
+    args = parser.parse_args()
+    main(args.seed, args.unfreeze_blocks, args.run_tag)
