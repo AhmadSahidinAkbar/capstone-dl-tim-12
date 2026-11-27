@@ -1,0 +1,21 @@
+{
+  "model": "non_dl_baseline",
+  "seed": 1,
+  "metrik": {
+    "random_forest": {
+      "val_acc": 0.055556,
+      "val_macro_f1": 0.036364
+    },
+    "svm": {
+      "val_acc": 0.055556,
+      "val_macro_f1": 0.017391
+    },
+    "best_val_acc": 0.055556,
+    "best_val_macro_f1": 0.036364
+  },
+  "best_model": "Random Forest",
+  "n_fitur": 128,
+  "n_train": 324,
+  "n_val": 36,
+  "durasi_detik": 0.52
+}

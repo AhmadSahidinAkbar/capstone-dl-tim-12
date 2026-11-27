@@ -2,7 +2,7 @@
 
 **Jalur Model**: CNN dari Nol (Modul 05)  
 **Kasus**: Klasifikasi 10 Perintah Suara Pengendali Meja (Log-mel 64 pita, 1 detik)  
-**Status Sprint 1**: Kerangka model teruji pada data simulasi (Seed 1)
+**Status Sprint 1**: Latih pada data primer meja uji (Seed 1) — Siap Direview
 
 ---
 
@@ -32,7 +32,18 @@ Model menerima input spektrogram Log-mel berdimensi `[Batch, 1, 64, Waktu]`:
 
 ---
 
-## 4. Hasil Awal Data Simulasi (Seed 1)
+## 4. Hasil Pelatihan pada Data Primer Meja Uji (Seed 1)
 * **File Metrics**: `results/122450044/metrics.json`
-* **Data Hash**: `edb46995414bfa955cbcb6c65c28927e`
-* **Durasi Pelatihan**: ~4.9 detik (sangat cepat dan memenuhi batas komputasi $\le$ 20 menit di CPU laptop).
+* **File Prediksi Validasi**: `results/122450044/pred_val.npy`
+* **Data Hash**: `03955ddbf7a0c3de9d6d05052cadde6d` (sesuai `data/MANIFEST.json`)
+* **Jumlah Sampel Validasi**: 36 sampel (GroupKFold berbasis penutur)
+* **Metrik Utama (Seed 1)**:
+  * **Akurasi Validasi**: `0.0278` (2.78%)
+  * **Macro-F1 Validasi**: `0.0222`
+* **Durasi Pelatihan**: ~7.8 detik pada CPU laptop (jauh di bawah batas $\le$ 20 menit).
+* **Perbandingan dengan Pembanding Non-DL**:
+  * Random Forest: Macro-F1 = `0.0364`
+  * AudioCNN: Macro-F1 = `0.0222`
+* **Rencana Sprint 2**:
+  * Penyetelan hiperparameter (learning rate scheduler, bobot dropout, jumlah filter konvolusi).
+  * Evaluasi multi-seed (seed 1, seed 2, seed 3) dan uji generalisasi pada penutur luar.

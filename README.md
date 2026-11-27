@@ -91,6 +91,35 @@ Alur reproduksi dari data hingga tabel komparasi tim:
    - Metrik dan prediksi validasi tiap anggota: `results/<nim>/metrics.json` dan `results/<nim>/pred_val.npy`
    - Tabel komparasi seluruh jalur tim: `reports/hasil_komparasi.md`
 
+## Reproduksi Tim 12 (DL Lovers — Perintah Suara 10 Kata)
+
+Alur reproduksi dari data hingga tabel komparasi tim:
+
+1. **Siapkan lingkungan & dependensi:**
+   ```bash
+   pip install -r requirements.txt
+   ```
+2. **Siapkan data kasus di `data/`:**
+   - Pastikan berkas fitur `data/audio_primer_16khz.npz` (`[360, 64, 32]`, Log-mel 64 pita, 16 kHz mono, 1,00 detik) berada di folder `data/`.
+   - Informasi sesi dan tautan arsip audio lengkap tercatat di `data/CATATAN-SESI.md` dan `data/MANIFEST.json`.
+   - Modul pemotong jendela audio 1 detik tersedia di `src/common/pemotong.py`.
+3. **Jalankan seluruh model tim (perintah reproduksi):**
+   - **Sprint 1 (1 seed):**
+     ```bash
+     python run_all.py --seeds 1
+     ```
+   - **Sprint 2 (3 seed):**
+     ```bash
+     python run_all.py --seeds 1 2 3
+     ```
+   - **Satu model anggota saja (contoh CNN `122450044`):**
+     ```bash
+     python models/122450044/run.py --seed 1
+     ```
+4. **Keluaran hasil:**
+   - Metrik dan prediksi validasi tiap anggota: `results/<nim>/metrics.json` dan `results/<nim>/pred_val.npy`
+   - Tabel komparasi seluruh jalur tim: `reports/hasil_komparasi.md`
+
 ## Yang dibakukan untuk semua tim
 
 - Split latih/validasi beku dari data latih dengan seed 2026 (`src/common/split.py`); data uji
