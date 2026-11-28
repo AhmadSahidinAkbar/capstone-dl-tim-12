@@ -35,3 +35,14 @@
 
 - **Arsip Dataset Rekaman Ponsel (`partisipan_hp_H01_H30.zip`, 900 file WAV 16 kHz mono):**  
   https://drive.google.com/file/d/142c1sE9wOS9hMIzyO-IGhHu9O2AILSUs/view?usp=sharing
+
+---
+
+## 4. Verifikasi Konversi 16 kHz Mono & Perangkat Perekaman Ponsel (Kartu #7 — Penjaga Data)
+- **Pemeriksa:** Kharisma Mustika Sari (`123450034`)
+- **Perangkat & Format Sumber Perekaman:**
+  - Direkam menggunakan **ponsel Android dan iPhone** (penutur `H01`–`H30`) melalui aplikasi **Perekam Suara bawaan ponsel** serta rekaman **Voice Note / Audio WhatsApp**.
+  - Format berkas sumber sebelum konversi terdiri atas `.oga` / `.ogg` (Opus/Vorbis), `.m4a` / `.aac` (AAC), serta `.mpeg` / `.mp4`.
+- **Hasil Konversi & Verifikasi Mutu:**
+  - Seluruh berkas mentah telah dikonversi terlebih dahulu menjadi **WAV mono 16 kHz (16-bit PCM)** sebelum pemotongan jendela **1,00 detik (`16.000` sampel)** per kata.
+  - Total terverifikasi: **30 penutur (`H01`–`H30`) × 30 klip = 900 berkas WAV** dengan laju sampel seragam `16000 Hz`, `1 channel` (mono), `0` berkas hening, dan tersimpan di `data/partisipan_hp/` serta arsip Google Drive tim.
