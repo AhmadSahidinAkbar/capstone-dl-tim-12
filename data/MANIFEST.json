@@ -4,7 +4,7 @@
     "data/audio_primer_16khz.npz"
   ],
   "catatan": "Data primer meja uji fisik 6 partisipan (P01-P06), 10 kata perintah suara, 2 taraf bising kipas (0 dan 255), 3 ulangan (total 360 kondisi). Format masukan: Log-mel 64 pita frekuensi, 1 detik (16 kHz).",
-  "data_hash": "3b0122156a0f0f60daea8cd3f22ca7322d057dce13a5e26612931f7f8d12d661",
+  "data_hash": "a1cbb6263d5d79f3764fb31257c722c1",
   "n_sampel": 360,
   "dimensi_fitur": [
     64,
