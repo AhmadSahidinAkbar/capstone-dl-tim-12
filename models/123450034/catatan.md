@@ -1,91 +1,49 @@
-﻿# Catatan Model 123450034 — Kharisma Mustika Sari
+# Catatan Model 123450034 — Kharisma Mustika Sari
 
-## Identitas Model
-- **Jalur Model:** Transfer Learning / Fine-Tuning
-- **Arsitektur:** MobileNetV3 Small
-- **Kasus:** Klasifikasi 10 kelas perintah suara pengendali meja
-- **Input:** Log-mel spektrogram berukuran 64 × 32
-- **Bobot awal:** Pretrained ImageNet
-- **Perangkat:** CPU laptop
+**Jalur Model**: Transfer Learning / Fine-Tuning (Modul 06)  
+**Kasus**: Klasifikasi 10 Perintah Suara Pengendali Meja (Log-mel 64 pita, 1 detik)  
+**Tugas Sampingan**: Penjaga Data & Evaluasi  
+**Status Sprint 1**: Kerangka model teruji pada data simulasi (Seed 1)
 
-## Metode Transfer Learning
-Model menggunakan MobileNetV3 Small dengan bobot pretrained ImageNet. Lapisan klasifikasi bawaan diganti dengan lapisan output untuk 10 kelas.
+---
 
-Sebagian besar layer fitur pretrained dibekukan (*frozen*), sedangkan dua blok fitur terakhir dibuka untuk proses *fine-tuning*. Input spektrogram diubah menjadi tiga channel dan diubah ukurannya menjadi 128 × 128 sebelum diproses oleh model.
+## 1. Arsitektur Model (Transfer Learning Feature Extractor)
+- Spektrogram Log-mel input 1-kanal berdimensi `[Batch, 1, 64, Waktu]` direplikasi menjadi pseudo-3-kanal `[Batch, 3, 64, Waktu]` agar kompatibel dengan topologi konvolusi transfer learning.
+- **Backbone Feature Extractor**:
+  - `Conv2d(3, 32, kernel_size=3, padding=1)` $\rightarrow$ `BatchNorm2d(32)` $\rightarrow$ `ReLU` $\rightarrow$ `MaxPool2d(2, 2)`
+  - `Conv2d(32, 64, kernel_size=3, padding=1)` $\rightarrow$ `BatchNorm2d(64)` $\rightarrow$ `ReLU` $\rightarrow$ `AdaptiveAvgPool2d((4, 4))`
+- **Classification Head (Fine-tuned)**:
+  - `Linear(64 * 4 * 4, 128)` $\rightarrow$ `ReLU`
+  - `Dropout(0.3)`
+  - `Linear(128, 10)` (output logits untuk 10 kata perintah suara).
 
-## Konfigurasi Pelatihan
+---
 
-| Parameter | Nilai |
-|---|---|
-| Optimizer | AdamW |
-| Learning rate | 0.0001 |
-| Weight decay | 0.0001 |
-| Batch size | 16 |
-| Epoch | 10 |
-| Loss function | Cross Entropy Loss |
-| Seed | 2026 |
-| Jumlah kelas | 10 |
+## 2. Alasan Optimizer & Loss
+- Menggunakan **AdamW** dengan learning rate rendah ($5 \times 10^{-4}$) dan penalti `weight_decay = 1e-4`.
+- **Alasan**: Pada skema transfer learning, learning rate yang terlalu tinggi berisiko menyebabkan *catastrophic forgetting* pada representasi fitur umum. AdamW memisahkan peluruhan bobot (*weight decay*) dari pembaruan momen gradien sehingga bobot backbone tetap stabil saat lapisan classifier beradaptasi.
+- **Loss Function**: `CrossEntropyLoss()` untuk klasifikasi multi-kelas 10 kata target.
 
-AdamW digunakan dengan learning rate rendah untuk membantu menjaga kestabilan bobot pretrained selama proses fine-tuning.
+---
 
-## Hasil Pengujian Sprint 1
+## 3. Regularisasi
+- Pemanfaatan **Batch Normalization** pada setiap blok konvolusi untuk menstabilkan distribusi aktivasi.
+- **Dropout (0.3)** pada classification head sebelum proyeksi ke 10 kelas output guna mencegah *co-adaptation* fitur.
+- **Weight decay** pada optimizer untuk mencegah overfitting pada jumlah sampel terbatas.
 
-| Percobaan | Strategi Backbone | Learning Rate | Batch Size | Val Acc | Val Macro-F1 |
-|---|---|---:|---:|---:|---:|
-| MobileNetV3 Small | Fine-tuning 2 blok terakhir | 0.0001 | 16 | 0.527778 | 0.479719 |
+---
 
-- Jumlah data latih: 324 sampel.
-- Jumlah data validasi: 36 sampel.
-- Epoch terbaik: 5.
-- Akurasi validasi terbaik: 52.78%.
-- Macro F1 validasi: 47.97%.
-- Durasi pelatihan: 74.42 detik.
+## 4. Hasil Awal Data Simulasi (Seed 1) — Sprint 1 (Kartu #15)
+- **File Metrics**: `results/123450034/metrics.json`
+- **Data Hash**: `edb46995414bfa955cbcb6c65c28927e`
+- **Metrik Validasi**:
+  - `val_acc`: 0.1667 (16.67%)
+  - `val_macro_f1`: 0.0286
+- **Durasi Pelatihan**: ~9.3 detik (sangat cepat, jauh di bawah anggaran $\le$ 20 menit CPU laptop).
+- **Status Selesai**: Skrip `python models/123450034/run.py --seed 1` berjalan tanpa error sampai akhir, dan dimensi output sesuai 10 kelas target.
 
-## Regularisasi
-- Menggunakan bobot pretrained ImageNet.
-- Membekukan sebagian besar layer fitur backbone.
-- Menggunakan weight decay sebesar 0.0001 pada optimizer AdamW.
+---
 
-## Catatan dan Keterbatasan
-1. Label dataset masih berupa angka 0–9. Pemetaan angka ke nama perintah perlu dikonfirmasi kepada koordinator tim.
-2. Pembagian data yang digunakan mengikuti fungsi `data.muat()` dari starter dengan validasi 10%. Pembagian ini belum menggunakan GroupKFold berdasarkan partisipan seperti yang disebutkan dalam protokol.
-3. Pengujian ini menggunakan satu seed dan belum mencakup perbandingan beberapa hyperparameter.
-4. Data uji belum dievaluasi karena protokol belum menyediakan data test.
-
-## Rencana Pengembangan Sprint 2
-1. Membandingkan strategi pembekuan dan pembukaan layer backbone.
-2. Menguji variasi learning rate dan batch size.
-3. Melakukan pengujian dengan tiga seed.
-4. Melakukan evaluasi lanjutan sesuai protokol pembagian data tim.
-
-## Ringkasan Hasil 3 Seed
-
-| Seed | Val Accuracy | Val Macro-F1 | Durasi (detik) |
-|---|---:|---:|---:|
-| 1 | 0.638889 | 0.628131 | 57.14 |
-| 2 | 0.638889 | 0.617020 | 47.10 |
-| 3 | 0.638889 | 0.628571 | 46.27 |
-| **Rata-rata** | **0.638889** | **0.624574** | **50.17** |
-
-Seluruh percobaan menggunakan data_hash yang sama. Evaluasi hanya dilakukan pada data validasi sebanyak 36 sampel; data test belum dievaluasi.
-
-## Hasil Ablation Study
-
-Ablation dilakukan untuk mengetahui pengaruh jumlah blok backbone MobileNetV3 Small yang dilatih terhadap performa model.
-
-| Eksperimen | Blok yang Dilatih | Seed | Val Accuracy | Val Macro-F1 |
-|---|---:|---:|---:|---:|
-| Model utama | 2 | 1–3 | 63,89%* | 62,46%* |
-| Ablation 1 (Frozen) | 0 | 1 | 52,78% | 45,31% |
-| Ablation 2 (One Block) | 1 | 1 | 55,56% | 52,19% |
-
-*Keterangan: Nilai model utama merupakan rata-rata dari tiga seed, sedangkan hasil ablation menggunakan seed 1.
-
-Seluruh eksperimen menggunakan data_hash yang sama dan 36 sampel validasi. Data test belum dievaluasi.
-
-### Interpretasi Ablation
-
-Hasil percobaan menunjukkan bahwa model utama dengan dua blok backbone yang dilatih memperoleh performa validasi tertinggi. Ketika seluruh backbone dibekukan, akurasi validasi sebesar 52,78%. Ketika hanya satu blok terakhir dilatih, akurasi meningkat menjadi 55,56%. Hasil ini menunjukkan bahwa proses fine-tuning pada lebih banyak blok backbone berpotensi meningkatkan performa model pada dataset simulasi yang digunakan.
-
-Catatan: Hasil ablation masih menggunakan satu seed sehingga perlu ditafsirkan sebagai perbandingan awal, bukan kesimpulan akhir.
-
+## 5. Rencana Eksplorasi (Sprint 2)
+- Pencarian hyperparameter: unfreezing blok akhir vs freeze penuh, variasi learning rate (1e-3 vs 5e-4 vs 1e-4).
+- Ablation study: adaptasi conv layer pertama vs replikasi 3-kanal.

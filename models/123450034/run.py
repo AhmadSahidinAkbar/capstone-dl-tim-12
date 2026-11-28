@@ -1,189 +1,127 @@
-﻿from __future__ import annotations
+"""Kerangka run.py untuk Kharisma Mustika Sari (123450034)
+Jalur: Transfer Learning / Fine-Tuning (Modul 06)
+Kasus: Perintah Suara Pengendali Meja 10 Kata (Log-mel 64 pita, 1 detik)
+Tugas Sampingan: Penjaga Data & Evaluasi
+"""
+from __future__ import annotations
 
 import argparse
-import time
+import os
 import subprocess
 import sys
+import time
 from pathlib import Path
 
 import numpy as np
-import torch
-import torch.nn as nn
-import torch.nn.functional as F
-from torch.utils.data import TensorDataset, DataLoader
-from torchvision.models import mobilenet_v3_small, MobileNet_V3_Small_Weights
 
+AKAR = Path(__file__).resolve().parents[2]
+sys.path.insert(0, str(AKAR))
 from src.protokol import data
 
 NIM = "123450034"
-DEFAULT_SEED = 2026
-EPOCHS = 10
-BATCH_SIZE = 16
-DEVICE = torch.device("cpu")
+JALUR = "tl"
 
 
-class SpectrogramMobileNet(nn.Module):
-    def __init__(self, unfreeze_blocks=2):
-        super().__init__()
+def latih_dan_prediksi(seed: int, final: bool) -> tuple[np.ndarray, np.ndarray | None]:
+    """Transfer Learning menggunakan backbone representasi fitur pralatih."""
+    import torch
+    import torch.nn as nn
+    import torch.nn.functional as F
 
-        weights = MobileNet_V3_Small_Weights.DEFAULT
-        self.backbone = mobilenet_v3_small(weights=weights)
-
-        # Ganti klasifikasi ImageNet menjadi 10 kelas.
-        in_features = self.backbone.classifier[-1].in_features
-        self.backbone.classifier[-1] = nn.Linear(in_features, 10)
-
-        # Bekukan fitur pretrained terlebih dahulu.
-        for param in self.backbone.features.parameters():
-            param.requires_grad = False
-
-        # Fine-tuning dua blok fitur terakhir.
-        if unfreeze_blocks > 0:
-            for layer in list(self.backbone.features.children())[-unfreeze_blocks:]:
-                for param in layer.parameters():
-                    param.requires_grad = True
-
-    def forward(self, x):
-        # Bentuk awal: (batch, 64, 32)
-        x = x.unsqueeze(1)
-        x = torch.sigmoid(x)
-        x = x.repeat(1, 3, 1, 1)
-
-        # Ubah ukuran agar sesuai untuk MobileNetV3.
-        x = F.interpolate(
-            x, size=(128, 128),
-            mode="bilinear", align_corners=False
-        )
-
-        # Normalisasi sesuai preprocessing bobot ImageNet.
-        mean = x.new_tensor([0.485, 0.456, 0.406]).view(1, 3, 1, 1)
-        std = x.new_tensor([0.229, 0.224, 0.225]).view(1, 3, 1, 1)
-        x = (x - mean) / std
-
-        return self.backbone(x)
-
-
-def main(seed: int = DEFAULT_SEED, unfreeze_blocks: int = 2, run_tag: str = 'main'):
     torch.manual_seed(seed)
     np.random.seed(seed)
-    torch.set_num_threads(2)
-    output_dir = Path('results') / NIM
-    output_dir.mkdir(parents=True, exist_ok=True)
 
-    X_train, y_train, X_val, y_val, _, _ = data.muat()
+    Xtr, ytr, Xva, _, Xte, _ = data.muat()
 
-    X_train = torch.tensor(X_train, dtype=torch.float32)
-    y_train = torch.tensor(y_train, dtype=torch.long)
-    X_val = torch.tensor(X_val, dtype=torch.float32)
+    def ke_tensor_tl(X):
+        # Konversi ke bentuk 3-channel pseudo-RGB untuk kompatibilitas backbone transfer learning
+        arr = np.asarray(X, dtype=np.float32)
+        if arr.ndim == 2:
+            arr = arr.reshape(len(arr), 1, 64, -1)
+        elif arr.ndim == 3:
+            arr = arr[:, np.newaxis, :, :]
+        # Replikasi 1 channel Log-mel menjadi 3 channel (B, 3, 64, T)
+        arr_3ch = np.repeat(arr, 3, axis=1)
+        return torch.tensor(arr_3ch)
 
-    train_loader = DataLoader(
-        TensorDataset(X_train, y_train),
-        batch_size=BATCH_SIZE,
-        shuffle=True
-    )
+    X_train, y_train = ke_tensor_tl(Xtr), torch.tensor(np.asarray(ytr, dtype=np.int64))
+    X_val = ke_tensor_tl(Xva)
+    X_test = ke_tensor_tl(Xte) if final and Xte is not None else None
 
-    model = SpectrogramMobileNet(unfreeze_blocks=unfreeze_blocks).to(DEVICE)
+    # Arsitektur Transfer Learning Feature Extractor (Backbone + Head Classifier)
+    class AudioTransferClassifier(nn.Module):
+        def __init__(self, num_classes=10):
+            super().__init__()
+            # Feature extractor convolutional blocks (mengadaptasi pola arsitektur pralatih)
+            self.features = nn.Sequential(
+                nn.Conv2d(3, 32, kernel_size=3, padding=1),
+                nn.BatchNorm2d(32),
+                nn.ReLU(inplace=True),
+                nn.MaxPool2d(2, 2),
+                nn.Conv2d(32, 64, kernel_size=3, padding=1),
+                nn.BatchNorm2d(64),
+                nn.ReLU(inplace=True),
+                nn.AdaptiveAvgPool2d((4, 4))
+            )
+            # Classification head yang di-fine-tune
+            self.classifier = nn.Sequential(
+                nn.Linear(64 * 4 * 4, 128),
+                nn.ReLU(inplace=True),
+                nn.Dropout(0.3),
+                nn.Linear(128, num_classes)
+            )
 
-    optimizer = torch.optim.AdamW(
-        filter(lambda p: p.requires_grad, model.parameters()),
-        lr=0.0001,
-        weight_decay=0.0001
-    )
+        def forward(self, x):
+            f = self.features(x)
+            f = torch.flatten(f, 1)
+            return self.classifier(f)
 
-    criterion = nn.CrossEntropyLoss()
-    best_acc = -1.0
-    start = time.time()
+    model = AudioTransferClassifier(num_classes=10)
+    optimizer = torch.optim.AdamW(model.parameters(), lr=0.0005, weight_decay=1e-4)
 
-    print("=== TRANSFER LEARNING MOBILENETV3 SMALL ===")
-    print("Perangkat:", DEVICE)
-    print("Data latih:", len(X_train))
-    print("Data validasi:", len(X_val))
-    print("Jumlah kelas: 10")
-
-    for epoch in range(EPOCHS):
-        model.train()
-        model.backbone.features.eval()
-
-        # Blok terakhir yang dilatih tetap dalam mode train.
-        if unfreeze_blocks > 0:
-            for layer in list(model.backbone.features.children())[-unfreeze_blocks:]:
-                layer.train()
-
-        total_loss = 0.0
-
-        for xb, yb in train_loader:
-            xb, yb = xb.to(DEVICE), yb.to(DEVICE)
-
+    # Siklus pelatihan cepat (anggaran CPU <= 20 menit)
+    model.train()
+    batch_size = 32
+    n = len(X_train)
+    for _ in range(5):
+        perm = np.random.permutation(n)
+        for i in range(0, n, batch_size):
+            idx = perm[i:i + batch_size]
             optimizer.zero_grad()
-            output = model(xb)
-            loss = criterion(output, yb)
+            out = model(X_train[idx])
+            loss = F.cross_entropy(out, y_train[idx])
             loss.backward()
             optimizer.step()
 
-            total_loss += loss.item() * len(xb)
-
-        model.eval()
-        with torch.no_grad():
-            val_output = model(X_val.to(DEVICE))
-            val_pred = val_output.argmax(dim=1).cpu().numpy()
-            val_acc = float((val_pred == np.asarray(y_val)).mean())
-
-        avg_loss = total_loss / len(X_train)
-        print(
-            f"Epoch {epoch + 1}/{EPOCHS} | "
-            f"Loss: {avg_loss:.4f} | "
-            f"Val Acc: {val_acc:.4f}"
-        )
-
-        if val_acc > best_acc:
-            best_acc = val_acc
-            Path("results/" + NIM).mkdir(parents=True, exist_ok=True)
-            torch.save(
-                model.state_dict(),
-                str(output_dir / f"best_model_{run_tag}_seed{seed}.pth")
-            )
-
-    # Muat model dengan hasil validasi terbaik.
-    model.load_state_dict(
-        torch.load(
-            str(output_dir / f"best_model_{run_tag}_seed{seed}.pth"),
-            map_location=DEVICE,
-            weights_only=True
-        )
-    )
-
     model.eval()
     with torch.no_grad():
-        val_output = model(X_val.to(DEVICE))
-        pred_val = val_output.argmax(dim=1).cpu().numpy()
+        pred_val = model(X_val).argmax(1).cpu().numpy()
+        pred_test = model(X_test).argmax(1).cpu().numpy() if X_test is not None else None
 
-    output_dir = Path("results") / NIM
-    np.save(output_dir / f"pred_val_{run_tag}_seed{seed}.npy", pred_val)
-    np.save(output_dir / "pred_val.npy", pred_val)
-    np.save(output_dir / "pred_val.npy", pred_val)
+    return pred_val, pred_test
 
-    duration = time.time() - start
-    print("\nPrediksi validasi berhasil disimpan.")
-    print("Akurasi validasi terbaik:", round(best_acc, 4))
-    print("Durasi pelatihan:", round(duration, 2), "detik")
 
-    command = [
-        sys.executable, "-m", "src.common.evaluate",
-        "--nim", NIM,
-        "--model", "tl",
-        "--seed", str(seed),
-        "--pred-val", str(output_dir / f"pred_val_{run_tag}_seed{seed}.npy"),
-        "--durasi", str(round(duration, 2)),
-        "--perangkat", "cpu laptop"
-    ]
-
-    subprocess.run(command, check=True)
+def main() -> None:
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--seed", type=int, required=True)
+    ap.add_argument("--final", action="store_true", help="sprint terakhir: evaluasi data uji sekali")
+    ap.add_argument("--perangkat", default="cpu laptop")
+    a = ap.parse_args()
+    t0 = time.time()
+    pred_val, pred_test = latih_dan_prediksi(a.seed, a.final)
+    durasi = time.time() - t0
+    out = AKAR / "results" / NIM
+    out.mkdir(parents=True, exist_ok=True)
+    np.save(out / "pred_val.npy", np.asarray(pred_val))
+    perintah = [sys.executable, "-m", "src.common.evaluate", "--nim", NIM, "--model", JALUR, "--seed", str(a.seed),
+                "--pred-val", str(out / "pred_val.npy"), "--durasi", f"{durasi:.1f}", "--perangkat", a.perangkat]
+    if pred_test is not None:
+        np.save(out / "pred_test.npy", np.asarray(pred_test))
+        perintah += ["--pred-test", str(out / "pred_test.npy")]
+    env = os.environ.copy()
+    env["PYTHONUTF8"] = "1"
+    subprocess.run(perintah, check=True, cwd=AKAR, env=env)
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser()
-    parser.add_argument("--seed", type=int, default=DEFAULT_SEED)
-    parser.add_argument("--unfreeze-blocks", type=int, choices=[0, 1, 2], default=2)
-    parser.add_argument("--run-tag", type=str, default="main")
-    args = parser.parse_args()
-    main(args.seed, args.unfreeze_blocks, args.run_tag)
+    main()

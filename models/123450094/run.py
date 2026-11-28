@@ -1,4 +1,4 @@
-"""Kerangka run.py untuk Tantiy Widiyastuti (123450094)
+"""Kerangka run.py untuk Tanty Widiyastuti (123450094)
 Jalur: Autoencoder Representasi untuk Klasifikasi/Anomali
 Kasus: Perintah Suara Pengendali Meja 10 Kata (Log-mel 64 pita, 1 detik)
 Tugas Sampingan: Reproduksi & Demo
@@ -6,6 +6,7 @@ Tugas Sampingan: Reproduksi & Demo
 from __future__ import annotations
 
 import argparse
+import os
 import subprocess
 import sys
 import time
@@ -117,7 +118,9 @@ def main() -> None:
     if pred_test is not None:
         np.save(out / "pred_test.npy", np.asarray(pred_test))
         perintah += ["--pred-test", str(out / "pred_test.npy")]
-    subprocess.run(perintah, check=True, cwd=AKAR)
+    env = os.environ.copy()
+    env["PYTHONUTF8"] = "1"
+    subprocess.run(perintah, check=True, cwd=AKAR, env=env)
 
 
 if __name__ == "__main__":
